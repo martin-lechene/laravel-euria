@@ -1,0 +1,3 @@
+# laravel-euria
+
+martin-lechene/laravel-euria (package standalone) couvre en 26 sections : l'architecture complète Driver Manager, tous les fichiers avec leur code PHP prêt à copier (InfomaniakHttpClient, TextDriver, StreamDriver, EmbeddingDriver, ImageDriver, AudioDriver), la Facade Euria:: + helper euria(), le système d'Agents (contrats, trait Promptable, AgentRunner), les 4 events Laravel, EuriaFake complet avec assertions, les 3 commandes Artisan, la suite Pest complète, PHPStan level 9 + Pint, les deux workflows GitHub Actions (tests + release Packagist auto), et la structure docs (README + Markdown + Gumroad).
