@@ -5,7 +5,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/martin-lechene/laravel-euria.svg)](https://packagist.org/packages/martin-lechene/laravel-euria)
 [![License](https://img.shields.io/packagist/l/martin-lechene/laravel-euria.svg)](LICENSE.md)
 
-Package Laravel pour l'API Infomaniak AI Services (Euria) — LLM souverain hébergé en Suisse.
+Laravel package for the Infomaniak AI Services (Euria) API — sovereign LLM hosted in Switzerland.
 
 ## Installation
 
@@ -15,13 +15,13 @@ composer require martin-lechene/laravel-euria
 
 ## Configuration
 
-Publiez la config :
+Publish the configuration:
 
 ```bash
 php artisan vendor:publish --tag=euria-config
 ```
 
-Puis configurez votre `.env` :
+Then configure your `.env`:
 
 ```env
 INFOMANIAK_API_TOKEN=your_oauth2_api_token_here
@@ -35,31 +35,31 @@ EURIA_IMAGE_FORMAT=square
 EURIA_EVENTS_ENABLED=true
 ```
 
-## Utilisation rapide
+## Quick Usage
 
 ```php
 use MartinLechene\Euria\EuriaFacade as Euria;
 
 // Via Facade
-$response = Euria::text('Bonjour Euria !');
+$response = Euria::text('Hello Euria!');
 echo $response;
 
 // Via helper
-$response = euria()->text('Bonjour !');
+$response = euria()->text('Hello!');
 
 // Override token (multi-tenant)
-$response = Euria::withToken('tok_org2_xxx')->model('llama-3')->text('Salut');
+$response = Euria::withToken('tok_org2_xxx')->model('llama-3')->text('Hi');
 
 // Streaming
-foreach (Euria::stream('Explique la souveraineté numérique') as $chunk) {
+foreach (Euria::stream('Explain digital sovereignty') as $chunk) {
     echo $chunk;
 }
 
 // Embeddings
-$embedding = euria()->embed('Texte à vectoriser')->first();
+$embedding = euria()->embed('Text to vectorize')->first();
 
 // Images
-$imageUrl = euria()->image('Un paysage alpin en été')->first();
+$imageUrl = euria()->image('An alpine landscape in summer')->first();
 
 // Transcription audio
 $text = euria()->transcribe('/path/to/audio.mp3');
@@ -74,42 +74,42 @@ class SupportBot implements \MartinLechene\Euria\Contracts\Agent
 
     public function instructions(): string
     {
-        return 'Tu es un assistant support souverain hébergé en Suisse.';
+        return 'You are a sovereign support assistant hosted in Switzerland.';
     }
 }
 
-$response = (new SupportBot)->prompt('Comment résilier mon abonnement ?');
+$response = (new SupportBot)->prompt('How do I cancel my subscription?');
 ```
 
 ## Testing
 
-Le package inclut `EuriaFake` pour tester sans appeler l'API :
+The package includes `EuriaFake` for testing without calling the API:
 
 ```php
 use MartinLechene\Euria\EuriaFacade as Euria;
 
-it('génère une réponse texte', function () {
+it('generates a text response', function () {
     $fake = Euria::fake();
-    $fake->fakeText('Bonjour depuis le fake !');
+    $fake->fakeText('Hello from the fake!');
 
-    $response = Euria::text('Dis bonjour');
+    $response = Euria::text('Say hello');
 
-    expect((string) $response)->toBe('Bonjour depuis le fake !');
+    expect((string) $response)->toBe('Hello from the fake!');
     $fake->assertTextCalled(1);
 });
 ```
 
-## Commandes Artisan
+## Artisan Commands
 
 ```bash
-php artisan euria:test        # Tester la connexion
-php artisan euria:models      # Lister les modèles disponibles
-php artisan make:euria-agent  # Créer un nouvel Agent
+php artisan euria:test        # Test connection
+php artisan euria:models      # List available models
+php artisan make:euria-agent  # Create a new Agent
 ```
 
 ## Contributing
 
-Les PRs sont les bienvenues ! Merci de lancer `composer quality` avant de soumettre.
+PRs are welcome! Please run `composer quality` before submitting.
 
 ## License
 

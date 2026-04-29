@@ -9,13 +9,13 @@ class ListModelsCommand extends Command
 {
     protected $signature = 'euria:models';
 
-    protected $description = 'Lister les modèles disponibles sur l\'API Infomaniak';
+    protected $description = 'List available models on the Infomaniak API';
 
     public function handle(EuriaManager $euria): int
     {
-        $this->info('Modèles Infomaniak AI Services disponibles :');
+        $this->info('Available Infomaniak AI Services models:');
         $this->table(
-            ['Capacité', 'Modèle', 'Défaut config'],
+            ['Capability', 'Model', 'Default config'],
             [
                 ['LLM Text',    'mixtral, llama-3, deepseek, mistral-7b', config('euria.defaults.text')],
                 ['Embeddings',  'text-embedding-3-small',                 config('euria.defaults.embedding')],

@@ -2,7 +2,7 @@
 
 use MartinLechene\Euria\EuriaFacade as Euria;
 
-it('fakeText fonctionne', function () {
+it('fakeText works', function () {
     $fake = Euria::fake();
     $fake->fakeText('Hello Fake');
 
@@ -10,7 +10,7 @@ it('fakeText fonctionne', function () {
     expect((string) $response)->toBe('Hello Fake');
 });
 
-it('fakeImage fonctionne', function () {
+it('fakeImage works', function () {
     $fake = Euria::fake();
     $fake->fakeImage('https://fake.url/image.png');
 
@@ -18,10 +18,10 @@ it('fakeImage fonctionne', function () {
     expect($image->first())->toBe('https://fake.url/image.png');
 });
 
-it('assertPromptContains fonctionne', function () {
+it('assertPromptContains works', function () {
     $fake = Euria::fake();
     $fake->fakeText('Test');
 
-    Euria::text('Dis-moi bonjour');
-    $fake->assertPromptContains('bonjour');
+    Euria::text('Say hello to me');
+    $fake->assertPromptContains('hello');
 });

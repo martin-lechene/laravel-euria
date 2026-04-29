@@ -24,7 +24,7 @@ class StructuredAgent implements Agent, HasStructuredOutput
     }
 }
 
-it('peut utiliser structured output', function () {
+it('can use structured output', function () {
     $fake = Euria::fake();
     $fake->fakeText(json_encode(['answer' => 'OK']));
 

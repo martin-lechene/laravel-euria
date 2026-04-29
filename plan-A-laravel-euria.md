@@ -1,85 +1,85 @@
-# Plan A — Package Standalone `martin-lechene/laravel-euria`
+# Plan A — Standalone Package `martin-lechene/laravel-euria`
 
-> Package Laravel 10–13 / PHP 8.1–8.4 pour l'API Infomaniak AI Services (Euria)  
-> Inspiré de `laravel/ai` — style, conventions, architecture identiques  
-> Distribution : Packagist public · Licence MIT
+> Laravel 10–13 / PHP 8.1–8.4 package for Infomaniak AI Services API (Euria)  
+> Inspired by `laravel/ai` — identical style, conventions, and architecture  
+> Distribution: Public Packagist · MIT License
 
 ---
 
-## Table des matières
+## Table of Contents
 
-1. [Contexte & objectifs](#1-contexte--objectifs)
-2. [Prérequis & contraintes techniques](#2-prérequis--contraintes-techniques)
-3. [Architecture générale](#3-architecture-générale)
-4. [Structure de fichiers complète](#4-structure-de-fichiers-complète)
-5. [composer.json — manifeste Composer](#5-composerjson--manifeste-composer)
+1. [Context & Objectives](#1-context--objectives)
+2. [Prerequisites & Technical Constraints](#2-prerequisites--technical-constraints)
+3. [General Architecture](#3-general-architecture)
+4. [Complete File Structure](#4-complete-file-structure)
+5. [composer.json — Composer Manifest](#5-composerjson--composer-manifest)
 6. [Service Provider](#6-service-provider)
 7. [Configuration `config/euria.php`](#7-configuration-configeuriaphp)
-8. [Authentification — token défaut + override par appel](#8-authentification--token-défaut--override-par-appel)
-9. [Client HTTP Infomaniak](#9-client-http-infomaniak)
-10. [Capacité 1 — LLM Text (Chat / Completion)](#10-capacité-1--llm-text-chat--completion)
-11. [Capacité 2 — Streaming SSE](#11-capacité-2--streaming-sse)
-12. [Capacité 3 — Function Calling / Tool Use](#12-capacité-3--function-calling--tool-use)
-13. [Capacité 4 — Embeddings](#13-capacité-4--embeddings)
-14. [Capacité 5 — Image Generation (SDXL / Flux)](#14-capacité-5--image-generation-sdxl--flux)
-15. [Capacité 6 — Audio Transcription (Whisper STT)](#15-capacité-6--audio-transcription-whisper-stt)
-16. [Facade `Euria::` et helper `euria()`](#16-facade-euria-et-helper-euria)
-17. [Système d'Agents (style laravel/ai)](#17-système-dagents-style-laravelai)
-18. [Events Laravel](#18-events-laravel)
-19. [EuriaFake — Testing Layer complet](#19-euriafake--testing-layer-complet)
-20. [Commandes Artisan](#20-commandes-artisan)
-21. [Suite de tests Pest PHP](#21-suite-de-tests-pest-php)
-22. [Qualité de code — PHPStan level 9 + Laravel Pint](#22-qualité-de-code--phpstan-level-9--laravel-pint)
+8. [Authentication — Default Token + Per-Call Override](#8-authentication--default-token--per-call-override)
+9. [Infomaniak HTTP Client](#9-infomaniak-http-client)
+10. [Capability 1 — LLM Text (Chat / Completion)](#10-capability-1--llm-text-chat--completion)
+11. [Capability 2 — SSE Streaming](#11-capability-2--sse-streaming)
+12. [Capability 3 — Function Calling / Tool Use](#12-capability-3--function-calling--tool-use)
+13. [Capability 4 — Embeddings](#13-capability-4--embeddings)
+14. [Capability 5 — Image Generation (SDXL / Flux)](#14-capability-5--image-generation-sdxl--flux)
+15. [Capability 6 — Audio Transcription (Whisper STT)](#15-capability-6--audio-transcription-whisper-stt)
+16. [Facade `Euria::` and Helper `euria()`](#16-facade-euria-and-helper-euria)
+17. [Agent System (laravel/ai style)](#17-agent-system-laravelai-style)
+18. [Laravel Events](#18-laravel-events)
+19. [EuriaFake — Complete Testing Layer](#19-euriafake--complete-testing-layer)
+20. [Artisan Commands](#20-artisan-commands)
+21. [Pest PHP Test Suite](#21-pest-php-test-suite)
+22. [Code Quality — PHPStan Level 9 + Laravel Pint](#22-code-quality--phpstan-level-9--laravel-pint)
 23. [CI/CD — GitHub Actions](#23-cicd--github-actions)
 24. [Documentation](#24-documentation)
-25. [Publication Packagist](#25-publication-packagist)
-26. [Roadmap de développement (phases)](#26-roadmap-de-développement-phases)
+25. [Packagist Publication](#25-packagist-publication)
+26. [Development Roadmap (Phases)](#26-development-roadmap-phases)
 
 ---
 
-## 1. Contexte & objectifs
+## 1. Context & Objectives
 
-### Pourquoi ce package ?
+### Why This Package?
 
-`laravel/ai` supporte OpenAI, Anthropic, Gemini, Mistral, etc. — mais **aucun provider Infomaniak/Euria** n'existe aujourd'hui. Or l'API Infomaniak AI Services est **compatible OpenAI** (même format de requêtes/réponses JSON), ce qui rend le bridging relativement direct, tout en nécessitant une gestion propre de l'authentification OAuth2, des endpoints spécifiques, et des modèles propres à la plateforme (Mixtral, Llama, DeepSeek, SDXL, Flux, Whisper).
+`laravel/ai` supports OpenAI, Anthropic, Gemini, Mistral, etc. — but **no Infomaniak/Euria provider** exists today. However, the Infomaniak AI Services API is **OpenAI-compatible** (same request/response JSON format), which makes bridging relatively straightforward, while requiring proper handling of OAuth2 authentication, specific endpoints, and platform-specific models (Mixtral, Llama, DeepSeek, SDXL, Flux, Whisper).
 
-### Objectifs du package
+### Package Objectives
 
-- Offrir une interface **Laravel-native** (Facade, Agents, Events, Fake) pour toutes les capacités Euria
-- Respecter les conventions de `laravel/ai` pour que les devs puissant passer de l'un à l'autre sans friction
-- Être **publié sur Packagist** et maintenu publiquement
-- Supporter PHP 8.1–8.4 et Laravel 10–13 (matrice large)
+- Provide a **Laravel-native** interface (Facade, Agents, Events, Fake) for all Euria capabilities
+- Follow `laravel/ai` conventions so developers can switch between them without friction
+- Be **published on Packagist** and maintained publicly
+- Support PHP 8.1–8.4 and Laravel 10–13 (broad matrix)
 
 ---
 
-## 2. Prérequis & contraintes techniques
+## 2. Prerequisites & Technical Constraints
 
-| Paramètre | Valeur |
+| Parameter | Value |
 |---|---|
-| PHP minimum | 8.1 |
-| PHP maximum testé | 8.4 |
-| Laravel minimum | 10.x |
-| Laravel maximum | 13.x |
-| Dépendances Composer | `illuminate/support`, `illuminate/http`, `guzzlehttp/guzzle` |
-| API Infomaniak base URL | `https://api.infomaniak.com` |
-| Auth | Bearer token (OAuth2 API token Infomaniak) |
-| Rate limit Infomaniak | 60 req/min (à gérer dans les tests et le client) |
-| Facturation | Par token LLM (in + out) |
-| Format API | Compatible OpenAI (JSON) |
-| Modèles LLM disponibles | Mistral, Mixtral, Llama 3, DeepSeek, etc. |
-| Modèles image | SDXL, Flux |
-| Modèle STT | Whisper |
-| Modèle embeddings | selon catalogue Infomaniak |
+| Minimum PHP | 8.1 |
+| Maximum tested PHP | 8.4 |
+| Minimum Laravel | 10.x |
+| Maximum Laravel | 13.x |
+| Composer Dependencies | `illuminate/support`, `illuminate/http`, `guzzlehttp/guzzle` |
+| Infomaniak API Base URL | `https://api.infomaniak.com` |
+| Auth | Bearer token (Infomaniak OAuth2 API token) |
+| Infomaniak Rate Limit | 60 req/min (to be handled in tests and client) |
+| Billing | Per LLM token (in + out) |
+| API Format | OpenAI-compatible (JSON) |
+| Available LLM Models | Mistral, Mixtral, Llama 3, DeepSeek, etc. |
+| Image Models | SDXL, Flux |
+| STT Model | Whisper |
+| Embedding Model | according to Infomaniak catalog |
 
-### Contraintes connues
+### Known Constraints
 
-- L'endpoint exact de l'API Infomaniak AI Services nécessitera une vérification contre la doc officielle (`developer.infomaniak.com/docs/api`) — les endpoints précis pour chaque capacité doivent être mappés dans la config
-- La compatibilité OpenAI signifie que le format des messages (`role`, `content`) est identique, mais l'auth et la base URL diffèrent
-- Pas de support Function Calling garanti sur tous les modèles — le package doit gérer les erreurs proprement
+- The exact Infomaniak AI Services API endpoint requires verification against official docs (`developer.infomaniak.com/docs/api`) — precise endpoints for each capability must be mapped in config
+- OpenAI compatibility means the message format (`role`, `content`) is identical, but auth and base URL differ
+- Function Calling support not guaranteed on all models — the package must handle errors gracefully
 
 ---
 
-## 3. Architecture générale
+## 3. General Architecture
 
 ```
 Facade Euria:: / helper euria()
@@ -108,20 +108,20 @@ EuriaClient          EuriaAgentRunner
     EuriaFake (testing swap)
 ```
 
-Le pattern est un **Driver Manager** standard Laravel (`Illuminate\Support\Manager`) — exactement comme `laravel/ai`. Chaque capacité a son propre driver encapsulé, mais partage le même client HTTP authentifié.
+The pattern is a standard Laravel **Driver Manager** (`Illuminate\Support\Manager`) — exactly like `laravel/ai`. Each capability has its own encapsulated driver, but they share the same authenticated HTTP client.
 
 ---
 
-## 4. Structure de fichiers complète
+## 4. Complete File Structure
 
 ```
 martin-lechene/laravel-euria/
 │
 ├── art/
-│   └── logo.svg                          # Logo du package (style laravel/ai)
+│   └── logo.svg                          # Package logo (laravel/ai style)
 │
 ├── config/
-│   └── euria.php                         # Config publiable
+│   └── euria.php                         # Publishable config
 │
 ├── database/
 │   └── migrations/
@@ -129,56 +129,56 @@ martin-lechene/laravel-euria/
 │       └── create_euria_conversation_messages_table.php
 │
 ├── resources/
-│   └── stubs/                            # Stubs pour les commandes Artisan
+│   └── stubs/                            # Stubs for Artisan commands
 │       └── agent.stub
 │       └── agent.structured.stub
 │       └── tool.stub
 │
 ├── src/
-│   ├── EuriaServiceProvider.php          # Service Provider principal
+│   ├── EuriaServiceProvider.php          # Main Service Provider
 │   ├── EuriaManager.php                  # Driver Manager
 │   ├── EuriaFacade.php                   # Facade Euria::
 │   │
 │   ├── Client/
-│   │   ├── InfomaniakHttpClient.php      # Client HTTP Guzzle + auth
-│   │   └── PendingRequest.php            # Fluent builder pour les requêtes
+│   │   ├── InfomaniakHttpClient.php      # Guzzle HTTP Client + auth
+│   │   └── PendingRequest.php            # Fluent builder for requests
 │   │
 │   ├── Drivers/
 │   │   ├── TextDriver.php                # LLM Chat / Completion
-│   │   ├── StreamDriver.php              # Streaming SSE
+│   │   ├── StreamDriver.php              # SSE Streaming
 │   │   ├── EmbeddingDriver.php           # Embeddings
 │   │   ├── ImageDriver.php               # Image generation SDXL / Flux
 │   │   └── AudioDriver.php               # Whisper STT
 │   │
 │   ├── Contracts/
-│   │   ├── Agent.php                     # Interface Agent
-│   │   ├── Conversational.php            # Interface Conversational
-│   │   ├── HasTools.php                  # Interface HasTools
-│   │   ├── HasStructuredOutput.php       # Interface HasStructuredOutput
-│   │   └── EuriaDriver.php               # Interface commune des drivers
+│   │   ├── Agent.php                     # Agent interface
+│   │   ├── Conversational.php            # Conversational interface
+│   │   ├── HasTools.php                  # HasTools interface
+│   │   ├── HasStructuredOutput.php       # HasStructuredOutput interface
+│   │   └── EuriaDriver.php               # Common driver interface
 │   │
 │   ├── Concerns/
-│   │   ├── Promptable.php                # Trait Promptable (prompt/stream/queue)
-│   │   └── RemembersConversations.php    # Trait persistance conversation DB
+│   │   ├── Promptable.php                # Promptable trait (prompt/stream/queue)
+│   │   └── RemembersConversations.php    # Conversation DB persistence trait
 │   │
 │   ├── Agents/
-│   │   └── AgentRunner.php               # Runner : résout tools, structured output, memory
+│   │   └── AgentRunner.php               # Runner: resolves tools, structured output, memory
 │   │
 │   ├── Messages/
-│   │   ├── Message.php                   # Value object message (role + content)
-│   │   └── MessageCollection.php         # Collection de messages
+│   │   ├── Message.php                   # Message value object (role + content)
+│   │   └── MessageCollection.php         # Message collection
 │   │
 │   ├── Responses/
-│   │   ├── TextResponse.php              # Réponse LLM standard
-│   │   ├── StreamedResponse.php          # Réponse SSE streamed
-│   │   ├── EmbeddingResponse.php         # Réponse embedding
-│   │   ├── ImageResponse.php             # Réponse génération image
-│   │   ├── AudioResponse.php             # Réponse transcription Whisper
-│   │   └── StructuredResponse.php        # Réponse structured output
+│   │   ├── TextResponse.php              # Standard LLM response
+│   │   ├── StreamedResponse.php          # SSE streamed response
+│   │   ├── EmbeddingResponse.php         # Embedding response
+│   │   ├── ImageResponse.php             # Image generation response
+│   │   ├── AudioResponse.php             # Whisper transcription response
+│   │   └── StructuredResponse.php        # Structured output response
 │   │
 │   ├── Tools/
-│   │   ├── Tool.php                      # Base class Tool
-│   │   └── ToolRegistry.php              # Registre des tools disponibles
+│   │   ├── Tool.php                      # Base Tool class
+│   │   └── ToolRegistry.php              # Available tools registry
 │   │
 │   ├── Events/
 │   │   ├── RequestSent.php
@@ -187,9 +187,9 @@ martin-lechene/laravel-euria/
 │   │   └── StreamChunkReceived.php
 │   │
 │   ├── Enums/
-│   │   ├── Model.php                     # Enum des modèles Infomaniak
-│   │   ├── ImageModel.php                # Enum SDXL / Flux
-│   │   └── Role.php                      # Enum user / assistant / system
+│   │   ├── Model.php                     # Infomaniak models enum
+│   │   ├── ImageModel.php                # SDXL / Flux enum
+│   │   └── Role.php                      # user / assistant / system enum
 │   │
 │   ├── Exceptions/
 │   │   ├── EuriaException.php
@@ -198,7 +198,7 @@ martin-lechene/laravel-euria/
 │   │   └── ModelNotSupportedException.php
 │   │
 │   ├── Testing/
-│   │   ├── EuriaFake.php                 # Fake complet style AI::fake()
+│   │   ├── EuriaFake.php                 # Complete fake (AI::fake() style)
 │   │   ├── FakeTextResponse.php
 │   │   ├── FakeStreamResponse.php
 │   │   ├── FakeEmbeddingResponse.php
@@ -215,7 +215,7 @@ martin-lechene/laravel-euria/
 │   └── agent.structured.stub
 │
 ├── tests/
-│   ├── Pest.php                          # Bootstrap Pest
+│   ├── Pest.php                          # Pest bootstrap
 │   ├── TestCase.php
 │   │
 │   ├── Unit/
@@ -239,7 +239,7 @@ martin-lechene/laravel-euria/
 ├── .github/
 │   └── workflows/
 │       ├── tests.yml                     # Tests + PHPStan + Pint
-│       └── release.yml                   # Release auto Packagist via tag
+│       └── release.yml                   # Auto release to Packagist via tag
 │
 ├── .gitattributes
 ├── .gitignore
@@ -255,7 +255,7 @@ martin-lechene/laravel-euria/
 
 ---
 
-## 5. composer.json — manifeste Composer
+## 5. composer.json — Composer Manifest
 
 ```json
 {
@@ -368,7 +368,7 @@ class EuriaServiceProvider extends ServiceProvider
                 __DIR__.'/../stubs/' => base_path('stubs/euria'),
             ], 'euria-stubs');
 
-            // Commandes Artisan
+            // Artisan Commands
             $this->commands([
                 MakeAgentCommand::class,
                 ListModelsCommand::class,
@@ -393,20 +393,20 @@ return [
     |--------------------------------------------------------------------------
     | Infomaniak API Token
     |--------------------------------------------------------------------------
-    | Token OAuth2 par défaut. Peut être surchargé par appel via ->withToken().
+    | Default OAuth2 token. Can be overridden per call via ->withToken().
     */
     'api_token' => env('INFOMANIAK_API_TOKEN'),
 
     /*
     |--------------------------------------------------------------------------
-    | Base URL de l'API Infomaniak AI Services
+    | Infomaniak AI Services API Base URL
     |--------------------------------------------------------------------------
     */
     'base_url' => env('INFOMANIAK_AI_BASE_URL', 'https://api.infomaniak.com/1/ai'),
 
     /*
     |--------------------------------------------------------------------------
-    | Modèles par défaut par capacité
+    | Default Models per Capability
     |--------------------------------------------------------------------------
     */
     'defaults' => [
@@ -418,14 +418,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Timeout HTTP (secondes)
+    | HTTP Timeout (seconds)
     |--------------------------------------------------------------------------
     */
     'timeout' => env('EURIA_TIMEOUT', 60),
 
     /*
     |--------------------------------------------------------------------------
-    | Options de génération d'images
+    | Image Generation Options
     |--------------------------------------------------------------------------
     */
     'image' => [
@@ -435,7 +435,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Persistance des conversations
+    | Conversation Persistence
     |--------------------------------------------------------------------------
     */
     'conversations' => [
@@ -445,7 +445,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Logging des events
+    | Event Logging
     |--------------------------------------------------------------------------
     */
     'events' => [
@@ -454,54 +454,54 @@ return [
 ];
 ```
 
-### Variables `.env` complètes
+### Complete `.env` Variables
 
 ```dotenv
-# Auth Infomaniak (requis)
+# Infomaniak Auth (required)
 INFOMANIAK_API_TOKEN=your_oauth2_api_token_here
 
-# Base URL (optionnel, pour proxy ou dev local)
+# Base URL (optional, for proxy or local dev)
 INFOMANIAK_AI_BASE_URL=https://api.infomaniak.com/1/ai
 
-# Modèles par défaut (optionnel)
+# Default models (optional)
 EURIA_DEFAULT_TEXT_MODEL=mixtral
 EURIA_DEFAULT_EMBEDDING_MODEL=text-embedding-3-small
 EURIA_DEFAULT_IMAGE_MODEL=sdxl
 EURIA_DEFAULT_AUDIO_MODEL=whisper-1
 
-# Timeout HTTP
+# HTTP Timeout
 EURIA_TIMEOUT=60
 
-# Format image par défaut : square | portrait | landscape
+# Default image format: square | portrait | landscape
 EURIA_IMAGE_FORMAT=square
 
-# Activer les events Laravel
+# Enable Laravel events
 EURIA_EVENTS_ENABLED=true
 ```
 
 ---
 
-## 8. Authentification — token défaut + override par appel
+## 8. Authentication — Default Token + Per-Call Override
 
-### Principe
+### Principle
 
-Le package utilise le token de `config('euria.api_token')` par défaut. Chaque appel peut être surchargé via `->withToken('autre_token')` pour le support multi-org / multi-tenant.
+The package uses the token from `config('euria.api_token')` by default. Each call can be overridden via `->withToken('other_token')` for multi-org / multi-tenant support.
 
 ```php
-// Utilisation standard (token .env)
-Euria::text('Bonjour !');
+// Standard usage (.env token)
+Euria::text('Hello!');
 
-// Override par appel (autre organisation)
-Euria::withToken('tok_org2_xxx')->text('Bonjour !');
+// Per-call override (different organization)
+Euria::withToken('tok_org2_xxx')->text('Hello!');
 
-// Chaînage fluent complet
+// Complete fluent chaining
 Euria::withToken('tok_org2_xxx')
     ->model('llama-3')
     ->timeout(120)
-    ->text('Bonjour !');
+    ->text('Hello!');
 ```
 
-### Implémentation `InfomaniakHttpClient`
+### `InfomaniakHttpClient` Implementation
 
 ```php
 // src/Client/InfomaniakHttpClient.php
@@ -602,8 +602,8 @@ class InfomaniakHttpClient
     {
         $code = $e->getResponse()->getStatusCode();
         match (true) {
-            $code === 401 => throw new AuthenticationException('Token Infomaniak invalide ou expiré.', $code, $e),
-            $code === 429 => throw new RateLimitException('Rate limit dépassé (60 req/min).', $code, $e),
+            $code === 401 => throw new AuthenticationException('Invalid or expired Infomaniak token.', $code, $e),
+            $code === 429 => throw new RateLimitException('Rate limit exceeded (60 req/min).', $code, $e),
             default       => throw new EuriaException($e->getMessage(), $code, $e),
         };
     }
@@ -612,7 +612,7 @@ class InfomaniakHttpClient
 
 ---
 
-## 9. Client HTTP Infomaniak
+## 9. Infomaniak HTTP Client
 
 ### `EuriaManager` — Driver Manager
 
@@ -663,13 +663,13 @@ class EuriaManager extends Manager
             baseUrl: config('euria.base_url'),
             timeout: $this->overrideTimeout ?? config('euria.timeout', 60),
         );
-        // Reset overrides après usage
+        // Reset overrides after use
         $this->overrideToken   = null;
         $this->overrideTimeout = null;
         return $client;
     }
 
-    // --- API surface (méthodes publiques) ---
+    // --- API surface (public methods) ---
 
     public function text(string $prompt, array $options = []): Responses\TextResponse
     {
@@ -705,7 +705,7 @@ class EuriaManager extends Manager
 
 ---
 
-## 10. Capacité 1 — LLM Text (Chat / Completion)
+## 10. Capability 1 — LLM Text (Chat / Completion)
 
 ### `TextDriver`
 
@@ -733,7 +733,7 @@ class TextDriver
     ): TextResponse {
         $model ??= config('euria.defaults.text', 'mixtral');
 
-        // Format compatible OpenAI
+        // OpenAI-compatible format
         $payload = array_merge([
             'model'    => $model,
             'messages' => empty($messages)
@@ -756,7 +756,7 @@ class TextDriver
 
         $data = $this->client->post('/openai/chat/completions', $payload);
 
-        // Dispatch event tokens
+        // Dispatch token events
         if (isset($data['usage'])) {
             event(new TokensUsed(
                 promptTokens:     $data['usage']['prompt_tokens'] ?? 0,
@@ -810,7 +810,7 @@ class TextResponse implements Stringable
 
 ---
 
-## 11. Capacité 2 — Streaming SSE
+## 11. Capability 2 — SSE Streaming
 
 ### `StreamDriver`
 
@@ -852,7 +852,7 @@ class StreamDriver
 }
 ```
 
-### Usage dans une route Laravel
+### Usage in a Laravel Route
 
 ```php
 // routes/web.php
@@ -860,7 +860,7 @@ use MartinLechene\Euria\EuriaFacade as Euria;
 
 Route::get('/stream', function () {
     return response()->stream(function () {
-        foreach (Euria::stream('Explique la souveraineté numérique') as $chunk) {
+        foreach (Euria::stream('Explain digital sovereignty') as $chunk) {
             echo "data: {$chunk}\n\n";
             ob_flush();
             flush();
@@ -875,9 +875,9 @@ Route::get('/stream', function () {
 
 ---
 
-## 12. Capacité 3 — Function Calling / Tool Use
+## 12. Capability 3 — Function Calling / Tool Use
 
-### Classe `Tool`
+### `Tool` Class
 
 ```php
 // src/Tools/Tool.php
@@ -908,7 +908,7 @@ abstract class Tool
 }
 ```
 
-### Exemple d'outil concret
+### Concrete Tool Example
 
 ```php
 // app/Ai/Tools/GetWeatherTool.php
@@ -918,39 +918,39 @@ class GetWeatherTool extends Tool
 {
     public function name(): string { return 'get_weather'; }
 
-    public function description(): string { return 'Obtient la météo actuelle pour une ville.'; }
+    public function description(): string { return 'Gets current weather for a city.'; }
 
     public function parameters(): array {
         return [
             'type'       => 'object',
             'properties' => [
-                'city' => ['type' => 'string', 'description' => 'Nom de la ville'],
+                'city' => ['type' => 'string', 'description' => 'City name'],
             ],
             'required' => ['city'],
         ];
     }
 
     public function handle(array $arguments): mixed {
-        return ['temperature' => 22, 'city' => $arguments['city'], 'condition' => 'Ensoleillé'];
+        return ['temperature' => 22, 'city' => $arguments['city'], 'condition' => 'Sunny'];
     }
 }
 ```
 
-### Usage avec tools dans un Agent
+### Usage with Tools in an Agent
 
 ```php
-$response = Euria::withTools([new GetWeatherTool])->text('Quel temps fait-il à Lyon ?');
+$response = Euria::withTools([new GetWeatherTool])->text('What is the weather in Lyon?');
 
 foreach ($response->toolCalls() as $call) {
     $tool   = resolve($call['function']['name']);
     $result = $tool->handle(json_decode($call['function']['arguments'], true));
-    // Boucle de continuation (multi-turn tool calling)
+    // Continuation loop (multi-turn tool calling)
 }
 ```
 
 ---
 
-## 13. Capacité 4 — Embeddings
+## 13. Capability 4 — Embeddings
 
 ### `EmbeddingDriver`
 
@@ -1021,7 +1021,7 @@ class EmbeddingResponse
 
 ---
 
-## 14. Capacité 5 — Image Generation (SDXL / Flux)
+## 14. Capability 5 — Image Generation (SDXL / Flux)
 
 ### `ImageDriver`
 
@@ -1089,7 +1089,7 @@ class ImageResponse
 
 ---
 
-## 15. Capacité 6 — Audio Transcription (Whisper STT)
+## 15. Capability 6 — Audio Transcription (Whisper STT)
 
 ### `AudioDriver`
 
@@ -1115,7 +1115,7 @@ class AudioDriver
     ): AudioResponse {
         $model ??= config('euria.defaults.audio', 'whisper-1');
 
-        // Whisper nécessite multipart/form-data
+        // Whisper requires multipart/form-data
         $guzzle = new Client([
             'base_uri' => config('euria.base_url'),
             'timeout'  => config('euria.timeout', 60),
@@ -1169,7 +1169,7 @@ class AudioResponse implements Stringable
 
 ---
 
-## 16. Facade `Euria::` et helper `euria()`
+## 16. Facade `Euria::` and Helper `euria()`
 
 ### Facade
 
@@ -1199,7 +1199,7 @@ class EuriaFacade extends Facade
 }
 ```
 
-### Helper global
+### Global Helper
 
 ```php
 // functions.php
@@ -1207,7 +1207,7 @@ use MartinLechene\Euria\EuriaManager;
 
 if (! function_exists('euria')) {
     /**
-     * Accès global au manager Euria.
+     * Global access to Euria manager.
      * @return EuriaManager
      */
     function euria(): EuriaManager
@@ -1223,22 +1223,22 @@ if (! function_exists('euria')) {
 // Via Facade
 use MartinLechene\Euria\EuriaFacade as Euria;
 
-$response = Euria::text('Bonjour Euria !');
-$response = Euria::withToken('tok_xxx')->model('llama-3')->text('Salut');
+$response = Euria::text('Hello Euria!');
+$response = Euria::withToken('tok_xxx')->model('llama-3')->text('Hi');
 
 // Via helper
-$response = euria()->text('Bonjour !');
-$image    = euria()->image('Un paysage alpin en été');
+$response = euria()->text('Hello!');
+$image    = euria()->image('An alpine landscape in summer');
 $audio    = euria()->transcribe('/path/to/audio.mp3');
 ```
 
 ---
 
-## 17. Système d'Agents (style laravel/ai)
+## 17. Agent System (laravel/ai style)
 
-Le package reproduit fidèlement le système d'Agents de `laravel/ai` — contrats PHP, trait `Promptable`, mémoire de conversation, structured output — mais en utilisant le client Infomaniak.
+The package faithfully reproduces the Agent system from `laravel/ai` — PHP contracts, `Promptable` trait, conversation memory, structured output — but using the Infomaniak client.
 
-### Contrats
+### Contracts
 
 ```php
 // src/Contracts/Agent.php
@@ -1270,7 +1270,7 @@ interface HasStructuredOutput
 }
 ```
 
-### Trait `Promptable`
+### `Promptable` Trait
 
 ```php
 // src/Concerns/Promptable.php
@@ -1306,7 +1306,7 @@ trait Promptable
 }
 ```
 
-### Exemple d'Agent complet
+### Complete Agent Example
 
 ```php
 // app/Ai/Agents/SupportBot.php
@@ -1325,8 +1325,8 @@ class SupportBot implements Agent, Conversational, HasTools, HasStructuredOutput
 
     public function instructions(): string
     {
-        return 'Tu es un assistant support souverain hébergé en Suisse par Infomaniak.
-                Tu réponds toujours en français, avec concision et bienveillance.';
+        return 'You are a support assistant hosted on Infomaniak in Switzerland.
+                You always respond in French, concisely and kindly.';
     }
 
     public function tools(): iterable
@@ -1355,33 +1355,33 @@ class SupportBot implements Agent, Conversational, HasTools, HasStructuredOutput
 ### Usage
 
 ```php
-// Utilisation simple
-$response = (new SupportBot)->prompt('Comment résilier mon abonnement ?');
-echo $response; // affiche le texte
+// Simple usage
+$response = (new SupportBot)->prompt('How do I cancel my subscription?');
+echo $response; // prints the text
 
-// Avec mémoire de conversation
-$response = (new SupportBot)->forUser($user)->prompt('Bonjour !');
+// With conversation memory
+$response = (new SupportBot)->forUser($user)->prompt('Hello!');
 $id       = $response->conversationId;
 
-// Continuer une conversation
-$response = (new SupportBot)->continue($id, as: $user)->prompt('Et pour les remboursements ?');
+// Continue a conversation
+$response = (new SupportBot)->continue($id, as: $user)->prompt('What about refunds?');
 
 // Structured output
-$response = (new SupportBot)->prompt('Analyse ce ticket...');
+$response = (new SupportBot)->prompt('Analyze this ticket...');
 echo $response['answer'];
 echo $response['confidence'];
 
 // Streaming
-foreach ((new SupportBot)->stream('Explique la politique de confidentialité') as $chunk) {
+foreach ((new SupportBot)->stream('Explain the privacy policy') as $chunk) {
     echo $chunk;
 }
 ```
 
 ---
 
-## 18. Events Laravel
+## 18. Laravel Events
 
-### Liste des events
+### Event List
 
 ```php
 // src/Events/RequestSent.php
@@ -1402,7 +1402,7 @@ class ResponseReceived
     public function __construct(
         public readonly string $endpoint,
         public readonly array  $response,
-        public readonly float  $duration,   // secondes
+        public readonly float  $duration,   // seconds
     ) {}
 }
 
@@ -1427,14 +1427,14 @@ class StreamChunkReceived
 }
 ```
 
-### Écoute des events (exemple)
+### Listening to Events (Example)
 
 ```php
 // app/Providers/EventServiceProvider.php
 use MartinLechene\Euria\Events\TokensUsed;
 
 Event::listen(TokensUsed::class, function (TokensUsed $event) {
-    // Comptabiliser les tokens utilisés
+    // Track token usage
     DB::table('ai_usage')->insert([
         'model'             => $event->model,
         'prompt_tokens'     => $event->promptTokens,
@@ -1447,7 +1447,7 @@ Event::listen(TokensUsed::class, function (TokensUsed $event) {
 
 ---
 
-## 19. EuriaFake — Testing Layer complet
+## 19. EuriaFake — Complete Testing Layer
 
 ### `EuriaFake`
 
@@ -1558,10 +1558,10 @@ class EuriaFake extends EuriaManager
 }
 ```
 
-### Binding du Fake dans les tests
+### Binding the Fake in Tests
 
 ```php
-// src/EuriaFacade.php — méthode fake()
+// src/EuriaFacade.php — fake() method
 public static function fake(): \MartinLechene\Euria\Testing\EuriaFake
 {
     $fake = new \MartinLechene\Euria\Testing\EuriaFake(app());
@@ -1570,27 +1570,27 @@ public static function fake(): \MartinLechene\Euria\Testing\EuriaFake
 }
 ```
 
-### Usage dans les tests Pest
+### Usage in Pest Tests
 
 ```php
 use MartinLechene\Euria\EuriaFacade as Euria;
 
-it('génère une réponse texte', function () {
+it('generates a text response', function () {
     $fake = Euria::fake();
-    $fake->fakeText('Bonjour depuis le fake !');
+    $fake->fakeText('Hello from fake!');
 
-    $response = Euria::text('Dis bonjour');
+    $response = Euria::text('Say hello');
 
-    expect((string) $response)->toBe('Bonjour depuis le fake !');
+    expect((string) $response)->toBe('Hello from fake!');
     $fake->assertTextCalled(1);
-    $fake->assertPromptContains('bonjour');
+    $fake->assertPromptContains('hello');
 });
 
-it('génère une image fake', function () {
+it('generates a fake image', function () {
     $fake = Euria::fake();
     $fake->fakeImage('https://cdn.test/image.png');
 
-    $image = Euria::image('Un paysage suisse');
+    $image = Euria::image('A Swiss landscape');
 
     expect($image->first())->toBe('https://cdn.test/image.png');
     $fake->assertImageCalled(1);
@@ -1599,7 +1599,7 @@ it('génère une image fake', function () {
 
 ---
 
-## 20. Commandes Artisan
+## 20. Artisan Commands
 
 ### `make:euria-agent`
 
@@ -1612,7 +1612,7 @@ use Illuminate\Console\GeneratorCommand;
 class MakeAgentCommand extends GeneratorCommand
 {
     protected $name      = 'make:euria-agent';
-    protected $description = 'Créer un nouvel Agent Euria';
+    protected $description = 'Create a new Euria Agent';
     protected $type      = 'Agent';
 
     protected function getStub(): string
@@ -1630,7 +1630,7 @@ class MakeAgentCommand extends GeneratorCommand
     protected function getOptions(): array
     {
         return [
-            ['structured', 's', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Créer un agent avec structured output'],
+            ['structured', 's', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'Create an agent with structured output'],
         ];
     }
 }
@@ -1648,13 +1648,13 @@ use MartinLechene\Euria\EuriaManager;
 class ListModelsCommand extends Command
 {
     protected $signature   = 'euria:models';
-    protected $description = 'Lister les modèles disponibles sur l\'API Infomaniak';
+    protected $description = 'List available models on the Infomaniak API';
 
     public function handle(EuriaManager $euria): int
     {
-        $this->info('Modèles Infomaniak AI Services disponibles :');
+        $this->info('Available Infomaniak AI Services models:');
         $this->table(
-            ['Capacité', 'Modèle', 'Défaut config'],
+            ['Capability', 'Model', 'Default in config'],
             [
                 ['LLM Text',    'mixtral, llama-3, deepseek, mistral-7b', config('euria.defaults.text')],
                 ['Embeddings',  'text-embedding-3-small',                 config('euria.defaults.embedding')],
@@ -1679,20 +1679,20 @@ use MartinLechene\Euria\EuriaFacade as Euria;
 class TestConnectionCommand extends Command
 {
     protected $signature   = 'euria:test';
-    protected $description = 'Tester la connexion à l\'API Infomaniak Euria';
+    protected $description = 'Test connection to Infomaniak Euria API';
 
     public function handle(): int
     {
-        $this->info('Test de connexion Infomaniak AI Services...');
+        $this->info('Testing Infomaniak AI Services connection...');
 
         try {
-            $response = Euria::text('Réponds "OK" en un seul mot.');
-            $this->info('✅ Connexion réussie !');
-            $this->line('Réponse : '.(string) $response);
-            $this->line('Modèle  : '.$response->model);
-            $this->line('Tokens  : '.$response->usage['total_tokens']);
+            $response = Euria::text('Reply "OK" in one word.');
+            $this->info('✅ Connection successful!');
+            $this->line('Response: '.(string) $response);
+            $this->line('Model: '.$response->model);
+            $this->line('Tokens: '.$response->usage['total_tokens']);
         } catch (\Exception $e) {
-            $this->error('❌ Erreur : '.$e->getMessage());
+            $this->error('❌ Error: '.$e->getMessage());
             return 1;
         }
 
@@ -1703,7 +1703,7 @@ class TestConnectionCommand extends Command
 
 ---
 
-## 21. Suite de tests Pest PHP
+## 21. Pest PHP Test Suite
 
 ### `tests/Pest.php`
 
@@ -1738,7 +1738,7 @@ class TestCase extends OrchestraTestCase
 }
 ```
 
-### Exemple de test Feature — `tests/Feature/AgentTest.php`
+### Feature Test Example — `tests/Feature/AgentTest.php`
 
 ```php
 <?php
@@ -1749,22 +1749,22 @@ use MartinLechene\Euria\Concerns\Promptable;
 
 class SimpleAgent implements Agent {
     use Promptable;
-    public function instructions(): string { return 'Tu es un assistant de test.'; }
+    public function instructions(): string { return 'You are a test assistant.'; }
 }
 
-it('peut prompt un agent simple', function () {
+it('can prompt a simple agent', function () {
     $fake = Euria::fake();
-    $fake->fakeText('Réponse de test OK');
+    $fake->fakeText('Test response OK');
 
-    $response = (new SimpleAgent)->prompt('Test ?');
+    $response = (new SimpleAgent)->prompt('Test?');
 
-    expect((string) $response)->toBe('Réponse de test OK');
+    expect((string) $response)->toBe('Test response OK');
     $fake->assertTextCalled(1);
 });
 
-it('peut streamer un agent', function () {
+it('can stream an agent', function () {
     $fake = Euria::fake();
-    // stream retourne les chunks un par un
+    // stream returns chunks one by one
     $chunks = [];
     foreach ((new SimpleAgent)->stream('Stream test') as $chunk) {
         $chunks[] = $chunk;
@@ -1773,12 +1773,12 @@ it('peut streamer un agent', function () {
 });
 ```
 
-### Matrice de tests — couverture complète
+### Test Matrix — Complete Coverage
 
-| Fichier | Tests |
+| File | Tests |
 |---|---|
 | `Unit/ClientTest.php` | Auth headers, token override, rate limit exception, 401 exception |
-| `Unit/TextDriverTest.php` | Payload format, model sélection, tool_calls extraction |
+| `Unit/TextDriverTest.php` | Payload format, model selection, tool_calls extraction |
 | `Unit/StreamDriverTest.php` | SSE parsing, chunk yield, [DONE] termination |
 | `Unit/EmbeddingDriverTest.php` | Payload, response parsing, cosineSimilarity |
 | `Unit/ImageDriverTest.php` | Payload SDXL/Flux, count, format |
@@ -1792,7 +1792,7 @@ it('peut streamer un agent', function () {
 
 ---
 
-## 22. Qualité de code — PHPStan level 9 + Laravel Pint
+## 22. Code Quality — PHPStan Level 9 + Laravel Pint
 
 ### `phpstan.neon`
 
@@ -1823,7 +1823,7 @@ parameters:
 }
 ```
 
-### `composer.json` scripts complets
+### Complete `composer.json` Scripts
 
 ```json
 "scripts": {
@@ -1840,7 +1840,7 @@ parameters:
 
 ## 23. CI/CD — GitHub Actions
 
-### `.github/workflows/tests.yml` — Tests + PHPStan + Pint sur chaque PR
+### `.github/workflows/tests.yml` — Tests + PHPStan + Pint on Every PR
 
 ```yaml
 name: Tests & Quality
@@ -1863,7 +1863,7 @@ jobs:
         laravel: ['10.*', '11.*', '12.*', '13.*']
         exclude:
           - php: '8.1'
-            laravel: '13.*'  # Laravel 13 requiert PHP 8.2+
+            laravel: '13.*'  # Laravel 13 requires PHP 8.2+
 
     steps:
       - name: Checkout
@@ -1891,7 +1891,7 @@ jobs:
         run: vendor/bin/pest --coverage --min=80
 ```
 
-### `.github/workflows/release.yml` — Release auto Packagist via tag
+### `.github/workflows/release.yml` — Auto Release to Packagist via Tag
 
 ```yaml
 name: Release & Packagist
@@ -1930,18 +1930,18 @@ jobs:
             -d '{"repository":{"url":"https://github.com/martin-lechene/laravel-euria"}}'
 ```
 
-### Secrets GitHub requis
+### Required GitHub Secrets
 
-| Secret | Valeur |
+| Secret | Value |
 |---|---|
-| `PACKAGIST_USERNAME` | Ton username Packagist |
-| `PACKAGIST_TOKEN` | Token API Packagist |
+| `PACKAGIST_USERNAME` | Your Packagist username |
+| `PACKAGIST_TOKEN` | Packagist API Token |
 
 ---
 
 ## 24. Documentation
 
-### README.md — structure
+### README.md — Structure
 
 ```markdown
 # 🇨🇭 Laravel Euria
@@ -1951,27 +1951,27 @@ jobs:
 [![Total Downloads](https://img.shields.io/packagist/dt/martin-lechene/laravel-euria.svg)]
 [![License](https://img.shields.io/packagist/l/martin-lechene/laravel-euria.svg)]
 
-Package Laravel pour l'API Infomaniak AI Services (Euria) — LLM souverain hébergé en Suisse.
+Laravel package for Infomaniak AI Services API (Euria) — sovereign LLM hosted in Switzerland.
 
 ## Installation
 ## Configuration
-## Utilisation rapide
+## Quick Usage
 ## Agents
 ## Streaming
 ## Embeddings
-## Génération d'images
-## Transcription audio
+## Image Generation
+## Audio Transcription
 ## Function Calling / Tools
 ## Testing (EuriaFake)
 ## Events
-## Commandes Artisan
+## Artisan Commands
 ## Contributing
 ## License
 ```
 
-### Docs Markdown (GitHub Pages / Docsify)
+### Markdown Docs (GitHub Pages / Docsify)
 
-Structure du dossier `docs/` :
+`docs/` folder structure:
 
 ```
 docs/
@@ -1987,94 +1987,94 @@ docs/
 ├── testing.md
 ├── events.md
 ├── artisan.md
-└── api-reference.md    # PHPDoc auto-généré
+└── api-reference.md    # Auto-generated PHPDoc
 ```
 
-### Gumroad Product Page — structure
+### Gumroad Product Page — Structure
 
 ```
-Titre        : Laravel Euria — Infomaniak AI SDK for Laravel
-Prix         : 0$ (gratuit) ou 9$ (avec docs PDF + exemples)
+Title        : Laravel Euria — Infomaniak AI SDK for Laravel
+Price        : $0 (free) or $9 (with PDF docs + examples)
 Description  :
-  - Ce que c'est (1 paragraph)
+  - What it is (1 paragraph)
   - Features list (bullets)
   - Code snippet (text)
   - Requirements (PHP/Laravel)
-  - Lien GitHub + Packagist
+  - GitHub + Packagist link
   - Screenshots (README rendered)
-  - Support / Issues : GitHub Issues
+  - Support / Issues: GitHub Issues
 ```
 
 ---
 
-## 25. Publication Packagist
+## 25. Packagist Publication
 
-### Étapes
+### Steps
 
-1. Créer le repo GitHub : `https://github.com/martin-lechene/laravel-euria`
-2. Push le code avec la structure complète + `composer.json`
-3. Aller sur `https://packagist.org/packages/submit`
-4. Soumettre l'URL du repo GitHub
-5. Activer le **GitHub webhook** Packagist pour les mises à jour auto
-6. Configurer les secrets GitHub CI/CD (`PACKAGIST_USERNAME`, `PACKAGIST_TOKEN`)
-7. Créer le premier tag : `git tag v0.1.0 && git push --tags`
-8. Vérifier sur `https://packagist.org/packages/martin-lechene/laravel-euria`
+1. Create GitHub repo: `https://github.com/martin-lechene/laravel-euria`
+2. Push code with complete structure + `composer.json`
+3. Go to `https://packagist.org/packages/submit`
+4. Submit the GitHub repo URL
+5. Enable Packagist **GitHub webhook** for auto updates
+6. Configure GitHub CI/CD secrets (`PACKAGIST_USERNAME`, `PACKAGIST_TOKEN`)
+7. Create first tag: `git tag v0.1.0 && git push --tags`
+8. Verify at `https://packagist.org/packages/martin-lechene/laravel-euria`
 
-### Versioning SemVer
+### SemVer Versioning
 
-| Tag | Signification |
+| Tag | Meaning |
 |---|---|
-| `v0.1.0` | Premier release — LLM Text + Streaming |
+| `v0.1.0` | First release — LLM Text + Streaming |
 | `v0.2.0` | + Embeddings + Images |
 | `v0.3.0` | + Whisper STT + Tools |
-| `v0.4.0` | + Agents complets + Memory |
-| `v1.0.0` | Stable — toutes capacités + tests + docs |
+| `v0.4.0` | + Complete Agents + Memory |
+| `v1.0.0` | Stable — all capabilities + tests + docs |
 
 ---
 
-## 26. Roadmap de développement (phases)
+## 26. Development Roadmap (Phases)
 
-### Phase 1 — Fondations (semaine 1)
+### Phase 1 — Foundations (Week 1)
 
-- [ ] Créer le repo GitHub `martin-lechene/laravel-euria`
-- [ ] Initialiser `composer.json`, `EuriaServiceProvider`, `EuriaManager`
-- [ ] Implémenter `InfomaniakHttpClient` (Guzzle + Bearer)
-- [ ] Implémenter `TextDriver` + `TextResponse`
-- [ ] Écrire `functions.php` (helper `euria()`)
-- [ ] Créer `EuriaFacade`
-- [ ] Configurer Pest + `TestCase` + `EuriaFake` de base
+- [ ] Create GitHub repo `martin-lechene/laravel-euria`
+- [ ] Initialize `composer.json`, `EuriaServiceProvider`, `EuriaManager`
+- [ ] Implement `InfomaniakHttpClient` (Guzzle + Bearer)
+- [ ] Implement `TextDriver` + `TextResponse`
+- [ ] Write `functions.php` (helper `euria()`)
+- [ ] Create `EuriaFacade`
+- [ ] Configure Pest + `TestCase` + basic `EuriaFake`
 - [ ] GitHub Actions `tests.yml`
-- [ ] README minimal
+- [ ] Minimal README
 
-### Phase 2 — Toutes les capacités (semaine 2)
+### Phase 2 — All Capabilities (Week 2)
 
 - [ ] `StreamDriver` + SSE
 - [ ] `EmbeddingDriver` + `EmbeddingResponse`
 - [ ] `ImageDriver` + `ImageResponse` (SDXL + Flux)
 - [ ] `AudioDriver` + `AudioResponse` (Whisper STT)
 - [ ] Events `RequestSent`, `ResponseReceived`, `TokensUsed`, `StreamChunkReceived`
-- [ ] Tests unitaires pour chaque driver
+- [ ] Unit tests for each driver
 
-### Phase 3 — Agents & Tools (semaine 3)
+### Phase 3 — Agents & Tools (Week 3)
 
-- [ ] Contrats `Agent`, `Conversational`, `HasTools`, `HasStructuredOutput`
-- [ ] Trait `Promptable` + `RemembersConversations`
-- [ ] `AgentRunner` complet
+- [ ] Contracts `Agent`, `Conversational`, `HasTools`, `HasStructuredOutput`
+- [ ] Traits `Promptable` + `RemembersConversations`
+- [ ] Complete `AgentRunner`
 - [ ] `ToolRegistry` + `Tool` base class
-- [ ] Migrations DB (conversations + messages)
-- [ ] Tests Feature Agents
+- [ ] DB Migrations (conversations + messages)
+- [ ] Feature Tests for Agents
 
-### Phase 4 — DX & Publication (semaine 4)
+### Phase 4 — DX & Publication (Week 4)
 
-- [ ] Commandes Artisan `make:euria-agent`, `euria:models`, `euria:test`
-- [ ] `EuriaFake` complet avec toutes les assertions
-- [ ] PHPStan level 9 passé
-- [ ] Pint formatage clean
-- [ ] Docs Markdown (GitHub Pages)
+- [ ] Artisan Commands `make:euria-agent`, `euria:models`, `euria:test`
+- [ ] Complete `EuriaFake` with all assertions
+- [ ] PHPStan level 9 passing
+- [ ] Pint formatting clean
+- [ ] Markdown Docs (GitHub Pages)
 - [ ] GitHub Actions `release.yml`
-- [ ] Publication Packagist `v1.0.0`
-- [ ] Page Gumroad
+- [ ] Packagist publication `v1.0.0`
+- [ ] Gumroad page
 
 ---
 
-*Fin du Plan A — `martin-lechene/laravel-euria`*
+*End of Plan A — `martin-lechene/laravel-euria`*

@@ -6,14 +6,14 @@ return [
     |--------------------------------------------------------------------------
     | Infomaniak API Token
     |--------------------------------------------------------------------------
-    | Token OAuth2 par défaut. Peut être surchargé par appel via ->withToken().
+    | Default OAuth2 token. Can be overridden via ->withToken() call.
     */
 
     'api_token' => env('INFOMANIAK_API_TOKEN'),
 
     /*
     |--------------------------------------------------------------------------
-    | Base URL de l'API Infomaniak AI Services
+    | Infomaniak AI Services API Base URL
     |--------------------------------------------------------------------------
     */
 
@@ -21,20 +21,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Modèles par défaut par capacité
+    | Default models per capability
     |--------------------------------------------------------------------------
     */
 
     'defaults' => [
-        'text' => env('EURIA_DEFAULT_TEXT_MODEL', 'mixtral'),
-        'embedding' => env('EURIA_DEFAULT_EMBEDDING_MODEL', 'text-embedding-3-small'),
-        'image' => env('EURIA_DEFAULT_IMAGE_MODEL', 'sdxl'),
-        'audio' => env('EURIA_DEFAULT_AUDIO_MODEL', 'whisper-1'),
+        'text'       => env('EURIA_DEFAULT_TEXT_MODEL', 'mixtral'),
+        'embedding'  => env('EURIA_DEFAULT_EMBEDDING_MODEL', 'text-embedding-3-small'),
+        'image'      => env('EURIA_DEFAULT_IMAGE_MODEL', 'sdxl'),
+        'audio'      => env('EURIA_DEFAULT_AUDIO_MODEL', 'whisper-1'),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Timeout HTTP (secondes)
+    | HTTP Timeout (seconds)
     |--------------------------------------------------------------------------
     */
 
@@ -42,29 +42,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Options de génération d'images
+    | Image generation options
     |--------------------------------------------------------------------------
     */
 
     'image' => [
         'default_format' => env('EURIA_IMAGE_FORMAT', 'square'),
-        'default_count' => 1,
+        'default_count'  => 1,
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Persistance des conversations
+    | Conversation persistence
     |--------------------------------------------------------------------------
     */
 
     'conversations' => [
-        'table' => 'euria_conversations',
+        'table'   => 'euria_conversations',
         'messages_table' => 'euria_conversation_messages',
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Logging des events
+    | Event logging
     |--------------------------------------------------------------------------
     */
 
