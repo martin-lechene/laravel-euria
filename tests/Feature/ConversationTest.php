@@ -14,7 +14,7 @@ class ConversationAgent implements Agent
     }
 }
 
-it('peut avoir un forUser', function () {
+it('can have a forUser', function () {
     $user = Mockery::mock('Illuminate\Foundation\Auth\User');
     $agent = new ConversationAgent;
     $result = $agent->forUser($user);
@@ -23,7 +23,7 @@ it('peut avoir un forUser', function () {
         ->and($agent->getUser())->toBe($user);
 });
 
-it('peut avoir un conversationId via continue', function () {
+it('can have a conversationId via continue', function () {
     $agent = new ConversationAgent;
     $result = $agent->continue('conv-123');
 

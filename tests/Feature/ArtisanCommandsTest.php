@@ -1,6 +1,6 @@
 <?php
 
-it('euria:models affiche les modèles', function () {
+it('euria:models displays the models', function () {
     $this->artisan('euria:models')
         ->expectsOutputToContain('LLM Text')
         ->assertExitCode(0);

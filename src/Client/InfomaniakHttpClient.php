@@ -131,8 +131,8 @@ class InfomaniakHttpClient
     {
         $code = $e->getResponse()->getStatusCode();
         match (true) {
-            $code === 401 => throw new AuthenticationException('Token Infomaniak invalide ou expiré.', $code, $e),
-            $code === 429 => throw new RateLimitException('Rate limit dépassé (60 req/min).', $code, $e),
+            $code === 401 => throw new AuthenticationException('Invalid or expired Infomaniak token.', $code, $e),
+            $code === 429 => throw new RateLimitException('Rate limit exceeded (60 req/min).', $code, $e),
             default => throw new EuriaException($e->getMessage(), $code, $e),
         };
     }

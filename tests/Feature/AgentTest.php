@@ -10,21 +10,21 @@ class SimpleAgent implements Agent
 
     public function instructions(): string
     {
-        return 'Tu es un assistant de test.';
+        return 'You are a test assistant.';
     }
 }
 
-it('peut prompt un agent simple', function () {
+it('can prompt a simple agent', function () {
     $fake = Euria::fake();
-    $fake->fakeText('Réponse de test OK');
+    $fake->fakeText('Test response OK');
 
-    $response = (new SimpleAgent)->prompt('Test ?');
+    $response = (new SimpleAgent)->prompt('Test?');
 
-    expect((string) $response)->toBe('Réponse de test OK');
+    expect((string) $response)->toBe('Test response OK');
     $fake->assertTextCalled(1);
 });
 
-it('peut streamer un agent', function () {
+it('can stream an agent', function () {
     $fake = Euria::fake();
 
     // Streaming returns a generator - just test it doesn't throw

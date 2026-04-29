@@ -9,20 +9,20 @@ class TestConnectionCommand extends Command
 {
     protected $signature = 'euria:test';
 
-    protected $description = 'Tester la connexion à l\'API Infomaniak Euria';
+    protected $description = 'Test connection to the Infomaniak Euria API';
 
     public function handle(): int
     {
-        $this->info('Test de connexion Infomaniak AI Services...');
+        $this->info('Testing Infomaniak AI Services connection...');
 
         try {
-            $response = Euria::text('Réponds "OK" en un seul mot.');
-            $this->info('✅ Connexion réussie !');
-            $this->line('Réponse : ' . (string) $response);
-            $this->line('Modèle  : ' . $response->model);
+            $response = Euria::text('Respond with "OK" in a single word.');
+            $this->info('✅ Connection successful!');
+            $this->line('Response: ' . (string) $response);
+            $this->line('Model   : ' . $response->model);
             $this->line('Tokens  : ' . $response->usage['total_tokens']);
         } catch (\Exception $e) {
-            $this->error('❌ Erreur : ' . $e->getMessage());
+            $this->error('❌ Error: ' . $e->getMessage());
 
             return 1;
         }
