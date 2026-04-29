@@ -9,7 +9,7 @@ class MakeAgentCommand extends GeneratorCommand
 {
     protected $name = 'make:euria-agent';
 
-    protected $description = 'Créer un nouvel Agent Euria';
+    protected $description = 'Create a new Euria Agent';
 
     protected $type = 'Agent';
 
