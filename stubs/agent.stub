@@ -1,0 +1,16 @@
+<?php
+
+namespace {{ namespace }};
+
+use MartinLechene\Euria\Concerns\Promptable;
+use MartinLechene\Euria\Contracts\Agent;
+
+class {{ class }} implements Agent
+{
+    use Promptable;
+
+    public function instructions(): string
+    {
+        return 'You are a helpful assistant.';
+    }
+}
