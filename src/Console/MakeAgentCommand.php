@@ -28,7 +28,7 @@ class MakeAgentCommand extends GeneratorCommand
     protected function getOptions(): array
     {
         return [
-            ['structured', 's', InputOption::VALUE_NONE, 'Créer un agent avec structured output'],
+            ['structured', 's', InputOption::VALUE_NONE, 'Create an agent with structured output'],
         ];
     }
 }

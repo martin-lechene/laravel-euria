@@ -265,7 +265,7 @@ martin-lechene/laravel-euria/
     "license": "MIT",
     "authors": [
         {
-            "name": "Martin Lécheně",
+            "name": "Martin Lechene",
             "email": "your@email.com"
         }
     ],
