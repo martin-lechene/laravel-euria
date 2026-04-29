@@ -1,0 +1,35 @@
+<?php
+
+namespace {{ namespace }};
+
+use MartinLechene\Euria\Tools\Tool;
+
+class {{ class }} extends Tool
+{
+    public function name(): string
+    {
+        return '{{ snake_case class }}';
+    }
+
+    public function description(): string
+    {
+        return 'Description of what this tool does.';
+    }
+
+    public function parameters(): array
+    {
+        return [
+            'type'       => 'object',
+            'properties' => [
+                'param' => ['type' => 'string', 'description' => 'Parameter description'],
+            ],
+            'required' => ['param'],
+        ];
+    }
+
+    public function handle(array $arguments): mixed
+    {
+        // Implement tool logic here
+        return $arguments['param'] ?? null;
+    }
+}

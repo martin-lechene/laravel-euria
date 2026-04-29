@@ -1,0 +1,28 @@
+<?php
+
+namespace {{ namespace }};
+
+use MartinLechene\Euria\Concerns\Promptable;
+use MartinLechene\Euria\Contracts\Agent;
+use MartinLechene\Euria\Contracts\HasStructuredOutput;
+
+class {{ class }} implements Agent, HasStructuredOutput
+{
+    use Promptable;
+
+    public function instructions(): string
+    {
+        return 'You are a helpful assistant that responds in JSON format.';
+    }
+
+    public function schema(): array
+    {
+        return [
+            'type'       => 'object',
+            'properties' => [
+                'answer' => ['type' => 'string'],
+            ],
+            'required' => ['answer'],
+        ];
+    }
+}
