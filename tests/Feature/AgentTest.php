@@ -2,7 +2,7 @@
 
 use MartinLechene\Euria\Concerns\Promptable;
 use MartinLechene\Euria\Contracts\Agent;
-use MartinLechene\Euria\EuriaFacade as Euria;
+use MartinLechene\Euria\Facades\Euria;
 
 class SimpleAgent implements Agent
 {

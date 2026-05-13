@@ -1,6 +1,6 @@
 <?php
 
-use MartinLechene\Euria\EuriaFacade as Euria;
+use MartinLechene\Euria\Facades\Euria;
 use MartinLechene\Euria\Responses\TextResponse;
 
 it('dispatch RequestSent event', function () {

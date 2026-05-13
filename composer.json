@@ -46,7 +46,7 @@
                 "MartinLechene\\Euria\\EuriaServiceProvider"
             ],
             "aliases": {
-                "Euria": "MartinLechene\\Euria\\EuriaFacade"
+                "Euria": "Euria"
             }
         }
     },

@@ -38,7 +38,7 @@ EURIA_EVENTS_ENABLED=true
 ## Quick Usage
 
 ```php
-use MartinLechene\Euria\EuriaFacade as Euria;
+use MartinLechene\Euria\Facades\Euria;
 
 // Via Facade
 $response = Euria::text('Hello Euria!');
@@ -86,7 +86,7 @@ $response = (new SupportBot)->prompt('How do I cancel my subscription?');
 The package includes `EuriaFake` for testing without calling the API:
 
 ```php
-use MartinLechene\Euria\EuriaFacade as Euria;
+use MartinLechene\Euria\Facades\Euria;
 
 it('generates a text response', function () {
     $fake = Euria::fake();

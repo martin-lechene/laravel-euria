@@ -3,7 +3,7 @@
 use MartinLechene\Euria\Concerns\Promptable;
 use MartinLechene\Euria\Contracts\Agent;
 use MartinLechene\Euria\Contracts\HasStructuredOutput;
-use MartinLechene\Euria\EuriaFacade as Euria;
+use MartinLechene\Euria\Facades\Euria;
 
 class StructuredAgent implements Agent, HasStructuredOutput
 {
