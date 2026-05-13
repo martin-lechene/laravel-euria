@@ -1,7 +1,16 @@
 {
     "name": "martin-lechene/laravel-euria",
     "description": "Laravel package for Infomaniak AI Services (Euria) — LLM, Embeddings, Images, Audio, Streaming",
-    "keywords": ["laravel", "ai", "infomaniak", "euria", "llm", "embeddings", "whisper", "sdxl"],
+    "keywords": [
+        "laravel",
+        "ai",
+        "infomaniak",
+        "euria",
+        "llm",
+        "embeddings",
+        "whisper",
+        "sdxl"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -46,7 +55,7 @@
                 "MartinLechene\\Euria\\EuriaServiceProvider"
             ],
             "aliases": {
-                "Euria": "Euria"
+                "Euria": "MartinLechene\\Euria\\Facades\\Euria"
             }
         }
     },
@@ -56,7 +65,11 @@
         "analyse": "phpstan analyse --memory-limit=512M",
         "format": "pint",
         "format:check": "pint --test",
-        "quality": ["@format:check", "@analyse", "@test"]
+        "quality": [
+            "@format:check",
+            "@analyse",
+            "@test"
+        ]
     },
     "config": {
         "sort-packages": true,
