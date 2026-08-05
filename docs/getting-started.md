@@ -24,7 +24,7 @@ INFOMANIAK_AI_BASE_URL=https://api.infomaniak.com/1/ai
 ## Quick Usage
 
 ```php
-use MartinLechene\Euria\EuriaFacade as Euria;
+use MartinLechene\Euria\Facades\Euria;
 
 $response = Euria::text('Hello Euria!');
 echo $response;

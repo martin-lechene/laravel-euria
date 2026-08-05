@@ -2,8 +2,9 @@
 
 namespace MartinLechene\Euria\Console;
 
+use Exception;
 use Illuminate\Console\Command;
-use MartinLechene\Euria\EuriaFacade as Euria;
+use MartinLechene\Euria\Facades\Euria;
 
 class TestConnectionCommand extends Command
 {
@@ -21,7 +22,7 @@ class TestConnectionCommand extends Command
             $this->line('Response: ' . (string) $response);
             $this->line('Model   : ' . $response->model);
             $this->line('Tokens  : ' . $response->usage['total_tokens']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('❌ Error: ' . $e->getMessage());
 
             return 1;

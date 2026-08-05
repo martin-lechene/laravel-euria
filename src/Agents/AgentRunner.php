@@ -2,12 +2,13 @@
 
 namespace MartinLechene\Euria\Agents;
 
+use Generator;
 use Illuminate\Foundation\Bus\PendingDispatch;
 use MartinLechene\Euria\Contracts\Agent;
 use MartinLechene\Euria\Contracts\Conversational;
 use MartinLechene\Euria\Contracts\HasStructuredOutput;
 use MartinLechene\Euria\Contracts\HasTools;
-use MartinLechene\Euria\EuriaFacade as Euria;
+use MartinLechene\Euria\Facades\Euria;
 
 class AgentRunner
 {
@@ -46,7 +47,7 @@ class AgentRunner
         Agent $agent,
         string $message,
         ?string $model = null,
-    ): \Generator {
+    ): Generator {
         $instructions = (string) $agent->instructions();
 
         $messages = [
